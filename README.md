@@ -141,6 +141,8 @@ make -C payloads x10           # Build for X10 (ARMv5TE)
 - [x] Mapped 507-entry UI State Machine Menu Table (`FSIMMENU`, `AFMENU`, `CUSTOMMENU`).
 - [x] Automated Ghidra headless analyzer wrapper and labeling script.
 - [x] ARM32 bare-metal payload harness, linker script, and relative branch injector.
-- [ ] Deep decompilation of DSP color matrix load routines via Ghidra headless.
-- [ ] Map lens focus stepping functions for manual focus Snap Focus.
+- [x] Deep reverse engineering of DSP color matrix tables and 3x3 transform coefficients (`core/film_simulation.py`, `docs/COLOR_PIPELINE.md`).
+- [x] Wi-Fi KASAGO TCP/IP crash analysis and defensive patch for modern Android 14+/iOS 18 devices (`core/wifi_patch.py`, `docs/WIFI_STACK_CRASH_ANALYSIS.md`).
+- [x] Map lens focus stepping functions and Snap Focus payload for Ricoh GR style instant focus jump (`payloads/snap_focus/`, `docs/X_MOUNT_LENS_PROTOCOL.md`).
+- [x] Reverse engineer custom film recipe serialization (C1-C7) and SD card recipe exchange (`core/recipe.py`, `docs/RECIPE_STORAGE_SPEC.md`).
 - [ ] Implement USB PTP RAM dumper payload for live telemetry without flashing flash memory.
