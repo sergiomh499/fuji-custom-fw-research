@@ -6,6 +6,7 @@
 *.dump
 *.o
 *.elf
+*.json
 
 # Python
 __pycache__/
