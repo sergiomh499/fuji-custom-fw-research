@@ -83,6 +83,18 @@ Fujifilm embeds SQLite to manage file system indexes, picture properties, and pe
 - **`create table fct(fc primary key,fcnt)`** (`0x00bf4454`)
   Tracks file counters.
 
+
+### Virtual Address Mapping & Pointer Table
+
+The X-T10 firmware is mapped into virtual RAM with a fixed delta:
+```
+VIRTUAL_ADDRESS = PHYSICAL_FILE_OFFSET + 0x0135FFB8
+```
+
+Ghidra headless xref analysis verified the following virtual pointers:
+- **`0x01F534A8`** (points to `SQLITE_TABLE_PT`): Found at file offset `0x00BF3494`.
+- **`0x01F5440C`** (points to `SQLITE_TABLE_FCT`): Found at file offset `0x00BF3498`.
+- **`0x01F53500`** (points to `SQLITE_TABLE_FINF`): Found in dispatch table at `0x021768C6` and `0x021768CA`.
 ---
 
 ## 5. Lens Mount Negotiation & Focus Stepping

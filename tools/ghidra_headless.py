@@ -40,7 +40,7 @@ def java_home(java_bin: str) -> str:
 def build_command(target, bin_path, project_dir, script=None):
     return build_invocation(target, bin_path, project_dir, script)
 
-def build_invocation(target, bin_path, project_dir, script=None):
+def build_invocation(target, bin_path, project_dir, script=None, noanalysis=False, timeout=None):
     bin_path = Path(bin_path).resolve()
     project_dir = Path(project_dir).resolve()
     project_dir.mkdir(parents=True, exist_ok=True)
@@ -58,7 +58,13 @@ def build_invocation(target, bin_path, project_dir, script=None):
         "-import", str(bin_path),
         "-processor", TARGET_LANGUAGES[target],
         "-overwrite",
+        "-loader", "BinaryLoader",
+        "-loader-baseAddr", "0x00000000",
     ]
+    if noanalysis:
+        cmd.append("-noanalysis")
+    if timeout:
+        cmd += ["-analysisTimeoutPerFile", str(timeout)]
     if script:
         script_path = Path(script).resolve()
         cmd += ["-scriptPath", str(script_path.parent), "-postScript", script_path.name]
@@ -72,6 +78,8 @@ def main():
     parser.add_argument("--project-dir", required=True, help="Output Ghidra project directory")
     parser.add_argument("--script", help="Optional post-analysis script")
     parser.add_argument("--dry-run", action="store_true", help="Print command and env without running")
+    parser.add_argument("--noanalysis", action="store_true", help="Skip full auto-analysis on import")
+    parser.add_argument("--timeout", type=int, help="Analysis timeout per file in seconds")
     args = parser.parse_args()
 
     bin_path = Path(args.bin)
@@ -79,7 +87,7 @@ def main():
         print(f"error: input binary not found: {bin_path}", file=sys.stderr)
         return 2
 
-    env, cmd = build_invocation(args.target, bin_path, args.project_dir, args.script)
+    env, cmd = build_invocation(args.target, bin_path, args.project_dir, args.script, args.noanalysis, args.timeout)
 
     if args.dry_run:
         print("Environment:")

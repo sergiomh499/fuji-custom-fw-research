@@ -6,6 +6,9 @@
 *.dump
 *.o
 *.elf
+*.gpr
+*.rep/
+ghidra_project/
 *.json
 
 # Python
