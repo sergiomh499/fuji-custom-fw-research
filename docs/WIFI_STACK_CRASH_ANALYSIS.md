@@ -113,3 +113,10 @@ X-T10 lacks these guards in v1.31.
 The patch is intentionally conservative: it does not attempt to modernize the
 whole KASAGO stack.  It only prevents the specific oversized/malformed inputs
 that crash X-T10, preserving normal camera Wi-Fi behavior.
+
+## Failure mitigation
+
+If a patched `.DAT` is rejected or bricks the camera, recover via
+`docs/BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery` (DISP/BACK forced
+update and version increment) and, for hardware-level bricks, via
+`docs/BRICK_ANALYSIS_AND_RECOVERY.md#level-3-hard-brick--recovery`.

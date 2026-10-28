@@ -42,7 +42,7 @@ Para entender por qué se produce un brick y cómo solucionarlo, es necesario co
 
 Para garantizar que un error en el código **nunca** escale a Nivel 3 (*Hard Brick*):
 
-### Regla 1: Trampolín en Menú Manual Seguro (*Cold Hook*)
+### Regla 1: Trampolín en Menú Manual Seguro (*Cold Hook*) {#cold-hooking}
 - **Nunca tocar el arranque temprano (*early boot*):** No colocar ganchos ni instrucciones de salto en los vectores de reset (`0x00000000`), ni en las rutinas de inicialización de memoria SDRAM.
 - **Inyectar solo en menús manuales secundarios:** Colocar el salto de ejecución en funciones que requieran interacción expresa del usuario (ejemplo: el submenú de *Impresión Instax*, *Notas de voz* o la pantalla de *Propiedades de foto*).
 - **Ventaja de seguridad:** Si el payload contiene un error fatal de memoria, la cámara se reiniciará con normalidad al encenderla, permitiendo usarla o reflashearla sin problemas porque el usuario no entra en ese submenú.
@@ -147,3 +147,28 @@ En la placa madre existen puntos de prueba marcados como `TX`, `RX` y `GND` que 
   picocom -b 115200 /dev/ttyUSB0
   ```
 - Al encender la cámara, el bootloader imprime el registro de errores, la causa exacta del bloqueo (ej. *Data Abort Exception* con dirección de memoria) y permite confirmar si la CPU sigue respondiendo.
+
+---
+
+## PTP RAM Recovery {#ptp-ram-recovery}
+
+DRAM used by the PTP transport is **100% volatile**. A hung PTP execution clears immediately on power-cycle: pull the battery for 30 s, then re-insert and reboot. No flash is written during PTP RAM operations, so the 0% brick risk applies. See Procedimiento A.
+
+## Firmware-Level Recovery {#firmware-level-recovery}
+
+For firmware repacking/patching failures: use the DISP/BACK forced-update path (Procedimiento A) and increment the firmware version so the bootloader accepts the reflash. See Procedimiento A / B.
+
+## Level 3 Hard Brick Recovery {#level-3-hard-brick--recovery}
+
+For hardware-level bricks: external SPI flash with Pomona 5250 clip + CH341A programmer running `flashrom`. See Procedimiento B.
+
+---
+
+## Hardware Telemetry & Level 3 Recovery {#hardware-telemetry}
+
+For physical UART telemetry tapping (3.3 V LVCMOS, 115200 8N1, TP_TX/TP_RX/GND) and in-circuit SPI flash dumping/debricking (Pomona 5250 + CH341A + flashrom), see [`docs/HARDWARE_TELEMETRY_AND_RECOVERY.md`](HARDWARE_TELEMETRY_AND_RECOVERY.md).
+
+Mitigation anchors (stable):
+- Volatile / PTP RAM: `#ptp-ram-recovery`
+- Firmware repacking / patching: `#firmware-level-recovery`
+- Hardware flashing (Level 3 Hard Brick): `#level-3-hard-brick--recovery`

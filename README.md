@@ -12,6 +12,7 @@ Research repository, tooling, and memory mapping for reverse-engineering and mod
 - Detailed legal analysis: [docs/LEGAL_AND_COMPLIANCE.md](docs/LEGAL_AND_COMPLIANCE.md)
 - AI Agent guidelines & pre-commit validation checklist: [AGENTS.md](AGENTS.md)
 - Brick risk analysis, prevention & debricking guide: [docs/BRICK_ANALYSIS_AND_RECOVERY.md](docs/BRICK_ANALYSIS_AND_RECOVERY.md)
+- Hardware telemetry, UART pinouts & flashrom recovery: [docs/HARDWARE_TELEMETRY_AND_RECOVERY.md](docs/HARDWARE_TELEMETRY_AND_RECOVERY.md)
 - Technical roadmap & next steps: [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md)
 ---
 
@@ -145,4 +146,8 @@ make -C payloads x10           # Build for X10 (ARMv5TE)
 - [x] Wi-Fi KASAGO TCP/IP crash analysis and defensive patch for modern Android 14+/iOS 18 devices (`core/wifi_patch.py`, `docs/WIFI_STACK_CRASH_ANALYSIS.md`).
 - [x] Map lens focus stepping functions and Snap Focus payload for Ricoh GR style instant focus jump (`payloads/snap_focus/`, `docs/X_MOUNT_LENS_PROTOCOL.md`).
 - [x] Reverse engineer custom film recipe serialization (C1-C7) and SD card recipe exchange (`core/recipe.py`, `docs/RECIPE_STORAGE_SPEC.md`).
-- [ ] Implement USB PTP RAM dumper payload for live telemetry without flashing flash memory.
+- [x] PTP USB live telemetry and volatile RAM dumper client (`core/ptp.py`, `tools/fuji_ptp.py`, mitigation: `docs/BRICK_ANALYSIS_AND_RECOVERY.md#ptp-ram-recovery`).
+- [x] OSD framebuffer overlay engine and position-independent ARMv7-A payload (`core/osd.py`, `payloads/osd_overlay/`, mitigation: `docs/BRICK_ANALYSIS_AND_RECOVERY.md#cold-hooking`).
+- [x] FinePix X10 EXR 1st Gen architecture analyzer and signature scanner (`core/x10_analyzer.py`, `fujitool analyze x10`).
+- [x] 3D-LUT to Fuji DSP matrix & 1D tone curve compiler (`core/lut_compiler.py`, `tools/lut_compiler.py`).
+- [x] Physical UART telemetry pinout and in-circuit SPI flashrom debricking runbook (`docs/HARDWARE_TELEMETRY_AND_RECOVERY.md`).

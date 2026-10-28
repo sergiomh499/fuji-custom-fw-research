@@ -207,6 +207,9 @@ class WifiPatch:
 
 WifiPatchEngine = WifiPatch
 
+WiFiPatcher = WifiPatch
+WifiPatch.apply_patch = WifiPatch.apply
+
 
 detect_wifi_crash = detect_wifi_vulnerability
 find_wifi_vulnerable_handler = identify_wifi_crash_sites

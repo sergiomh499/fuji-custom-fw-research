@@ -151,37 +151,107 @@ def cmd_patch_inject(args):
     print(f"[+] Injected payload ({len(payload)} bytes) at 0x{payload_addr:08x}")
     print(f"[+] Branch at 0x{hook_addr:08x} -> 0x{payload_addr:08x}")
     print(f"[+] Wrote {output_path}")
+def cmd_patch_wifi(args):
+    """Apply defensive Wi-Fi stack patch; mitigation: docs/BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery"""
+    from core.wifi_patch import apply_defensive_patch
+    from core.container import FujiContainer
+
+    input_path = Path(args.input)
+    output_path = Path(args.output)
+    data = input_path.read_bytes()
+
+    is_dat = False
+    fw = None
+    try:
+        fw = FujiContainer(data)
+        is_dat = True
+    except Exception:
+        is_dat = False
+
+    if is_dat:
+        payload = fw.get_unpacked_payload()
+        patched_payload = apply_defensive_patch(payload)
+        meta = fw.to_metadata()
+        out = FujiContainer.repack(
+            patched_payload, meta, increment_version=args.increment_version
+        )
+        output_path.write_bytes(out)
+        print(f"[+] Patched Wi-Fi stack in firmware .DAT")
+        print(f"[+] Wrote {output_path}")
+    else:
+        patched = apply_defensive_patch(data)
+        output_path.write_bytes(patched)
+        print(f"[+] Patched Wi-Fi stack in binary")
+        print(f"[+] Wrote {output_path}")
 
 
-def cmd_analyze_xt10(args):
+
+def cmd_analyze_x10(args):
+    """Analyze an X-T10 firmware binary (.bin or .DAT).
+
+    Failure mitigation: docs/BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery
+    """
     bin_path = Path(args.bin_file)
     if not bin_path.exists():
         print(f"[-] Binary not found: {bin_path}")
         return
-    data = bin_path.read_bytes()
+    raw = bin_path.read_bytes()
+
+    # Accept either an unpacked .bin or a packed .DAT (auto-unpack).
+    try:
+        from core.container import FujiContainer
+
+        fw = FujiContainer(raw)
+        data = bytes(fw.get_unpacked_payload())
+        print(f"[*] Detected .DAT container; unpacked {len(data):,} bytes")
+    except Exception:
+        data = raw
+
     print("=" * 60)
-    print(" Fujifilm X-T10 Firmware Analysis")
+    print(" Fujifilm X10 Firmware Analysis (v2.01)")
     print(f" Loaded: {len(data):,} bytes")
     print("=" * 60)
-    try:
-        from core.structures.film_simulation import FilmSimulationRegistry
-        from core.structures.menu_table import OSDMenuTable
-        from core.structures.sqlite_schema import SQLiteSchemaParser
-    except Exception:
-        FilmSimulationRegistry = None
-        OSDMenuTable = None
-        SQLiteSchemaParser = None
 
-    if FilmSimulationRegistry is not None:
-        tokens = FilmSimulationRegistry.parse_tokens(data)
-        print(f"\n[1] Film sim tokens: {len(tokens)}")
-    if OSDMenuTable is not None:
-        entries = OSDMenuTable.parse(data)
-        print(f"[2] Menu entries: {len(entries)}")
-    if SQLiteSchemaParser is not None:
-        tables = SQLiteSchemaParser.extract_tables(data)
-        print(f"[3] SQLite tables: {len(tables)}")
-    print("[+] Analysis complete.")
+    try:
+        from core.x10_analyzer import X10Analyzer
+    except Exception as exc:
+        print(f"[-] X10Analyzer unavailable: {exc}")
+        return
+
+    analyzer = X10Analyzer(data)
+    res = analyzer.analyze()
+
+    hdr = res.get("header")
+    if hdr:
+        print("\n[1] Header:")
+        for k in ("os_type", "model_code", "version", "checksum", "header_size", "payload_size"):
+            print(f"    {k}: {hdr.get(k)}")
+
+    vecs = res.get("vectors") or []
+    print(f"\n[2] ARMv5TE vector table ({len(vecs)} words):")
+    for idx, w in enumerate(vecs):
+        print(f"    V{idx}: 0x{w:08x}")
+
+    vt = res.get("vector_tables") or []
+    print(f"    vector-table candidates: {len(vt)}")
+
+    p = res.get("printim") or {}
+    print("\n[3] PRINTIM hook:")
+    print(f"    string offsets: {p.get('string_offsets')}")
+    print(f"    entry point:    0x{p.get('entry_point', 0):08x}")
+    print(f"    entry refs:     {len(p.get('entry_refs', []))}")
+
+    lb = res.get("lens_barrel") or {}
+    print("\n[4] Lens-barrel rotary-switch power-on:")
+    print(f"    markers: {len(lb.get('marker_offsets', []))} @ {lb.get('marker_offsets', [])[:8]}")
+
+    cms = res.get("color_matrices") or []
+    print(f"\n[5] 2/3\" sensor color matrices: {len(cms)}")
+    for c in cms[:5]:
+        print(f"    0x{c['offset']:08x}: {c.get('values')}")
+
+    print("\n[+] Analysis complete.")
+    print("    Failure mitigation: " + "docs/BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery")
 
 
 def build_parser():
@@ -232,11 +302,30 @@ def build_parser():
     p_inject.add_argument("output_bin")
     p_inject.set_defaults(func=cmd_patch_inject)
 
+    p_wifi = patch_sub.add_parser(
+        "wifi",
+        help="Apply defensive Wi-Fi stack patch (KASAGO)",
+        epilog="Failure mitigation: if patching fails, restore via docs/BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery (DISP/BACK forced update & version increment).",
+    )
+    p_wifi.add_argument("input", help="Path to DAT or unpacked .bin")
+    p_wifi.add_argument("output", help="Path to write patched file")
+    p_wifi.add_argument("--increment-version", action="store_true", help="Increment version if patching a .DAT")
+    p_wifi.set_defaults(func=cmd_patch_wifi)
+
+
     p_analyze = sub.add_parser("analyze", help="Model-specific analysis")
     analyze_sub = p_analyze.add_subparsers(dest="analyze_cmd", required=True)
     p_xt10 = analyze_sub.add_parser("xt10", help="Analyze X-T10 binary")
     p_xt10.add_argument("bin_file", nargs="?", default="xt10_v131.bin")
-    p_xt10.set_defaults(func=cmd_analyze_xt10)
+    p_xt10.set_defaults(func=cmd_analyze_x10)
+
+    p_x10 = analyze_sub.add_parser(
+        "x10",
+        help="Analyze FinePix X10 firmware (v2.01)",
+        epilog="Failure mitigation: if analysis/patching fails, recover via docs/BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery (DISP/BACK forced update). Volatile RAM: docs/BRICK_ANALYSIS_AND_RECOVERY.md#ptp-ram-recovery. Hard brick: docs/BRICK_ANALYSIS_AND_RECOVERY.md#level-3-hard-brick--recovery.",
+    )
+    p_x10.add_argument("bin_file", nargs="?", default="x10_v201.bin", help="Path to unpacked .bin or .DAT")
+    p_x10.set_defaults(func=cmd_analyze_x10)
 
     return parser
 

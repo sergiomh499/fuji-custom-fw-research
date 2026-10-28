@@ -33,7 +33,8 @@ graph TD
   1. Add PTP USB host client script in Python using `pyusb` / `libusb` to send raw PTP packets.
   2. Implement RAM dumper payload that responds to vendor PTP opcode `0x9028` by reading memory at address `[arg1]` for length `[arg2]` and streaming over USB bulk endpoint.
   3. Dump hardware register maps (`0x00000000 - 0x00010000` and `0x40000000+` peripheral space) to map clock gates, GPIO, and UART controllers.
-
+- **Failure Mitigation:** See [docs/BRICK_ANALYSIS_AND_RECOVERY.md#ptp-ram-recovery](BRICK_ANALYSIS_AND_RECOVERY.md#ptp-ram-recovery). If execution hangs, simply pull the battery. DRAM is 100% volatile and the camera reboots into stock firmware without flash wear.
+- **Status:** **IMPLEMENTED** in `core/ptp.py` and `tools/fuji_ptp.py`. Verified in `tests/test_ptp.py`.
 ---
 
 ### Step 2: Physical Hardware UART Discovery & Logic Analyzer Logging
@@ -46,7 +47,8 @@ graph TD
   1. Disassemble the bottom plate of a donor/test X-T10.
   2. Locate unpopulated 3-pad or 4-pad test headers (`TP_TX`, `TP_RX`, `GND`) near the main SoC or SD card daughterboard.
   3. Connect logic analyzer / 3.3V FTDI serial adapter; capture boot output and Wi-Fi initialization logs.
-
+- **Failure Mitigation:** See [docs/HARDWARE_TELEMETRY_AND_RECOVERY.md](HARDWARE_TELEMETRY_AND_RECOVERY.md#section-1-hardware-uart-telemetry-tapping). Always use 3.3V LVCMOS (never 5V TTL) with current-limiting resistors to protect SoC I/O.
+- **Status:** **DOCUMENTED** in `docs/HARDWARE_TELEMETRY_AND_RECOVERY.md`.
 ---
 
 ### Step 3: OSD Framebuffer Reverse Engineering (Zebra, Peaking, Grids)
@@ -97,7 +99,8 @@ graph TD
 - **Implementation Deliverables:**
   1. Tool `tools/lut_to_fuji.py`: converts 17x17x17 or 33x33x33 `.cube` LUTs into the closest 3x3 matrix + 1D spline curves.
   2. Inject profiles for **Classic Negative**, **Eterna Bleach Bypass**, and **Nostalgic Neg** into unused DSP memory blocks.
-
+- **Failure Mitigation:** See [docs/COLOR_PIPELINE.md](COLOR_PIPELINE.md) and [docs/BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery](BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery). Matrix fitting clamps Q15 coefficients and falls back to standard Provia matrix on divergence.
+- **Status:** **IMPLEMENTED** in `core/lut_compiler.py` and `tools/lut_compiler.py`. Verified in `tests/test_lut_compiler.py`.
 ---
 
 ### Step 7: Safe Hardware Testing & Debricking Bench Setup
@@ -110,3 +113,5 @@ graph TD
   - [ ] Complete flash dump backed up to 3 offline locations.
   - [ ] In-circuit read verified byte-for-byte identical over 3 consecutive reads.
   - [ ] Emergency bootloader partition (`0x00000000 - 0x00010000`) confirmed write-protected.
+- **Failure Mitigation:** See [docs/HARDWARE_TELEMETRY_AND_RECOVERY.md#section-2-in-circuit-spi-flash-dumping--debricking](HARDWARE_TELEMETRY_AND_RECOVERY.md#section-2-in-circuit-spi-flash-dumping--debricking) and [docs/BRICK_ANALYSIS_AND_RECOVERY.md#level-3-hard-brick--recovery](BRICK_ANALYSIS_AND_RECOVERY.md#level-3-hard-brick--recovery).
+- **Status:** **DOCUMENTED** with complete command runbook in `docs/HARDWARE_TELEMETRY_AND_RECOVERY.md`.
