@@ -103,12 +103,43 @@ python3 tools/fuji_fw.py scan xt10_v131.bin --filter film,focus,provia,menu --li
 python3 tools/fuji_fw.py repack xt10_v131_mod.bin xt10_v131.json FWUP0007_PATCHED.DAT --increment-version
 ```
 
+### Automated Ghidra Headless Analysis
+```bash
+# Launch Ghidra analyzeHeadless with automatic symbol and table labeling
+python3 tools/ghidra_headless.py \
+  --target xt10 \
+  --bin xt10_v131.bin \
+  --project-dir ./ghidra_project \
+  --script ghidra_scripts/LabelFujifilmStructures.py
+```
+
+### Binary Patch & Trampoline Injection
+```bash
+# Calculate relative ARM32 branch instruction between addresses
+python3 tools/fuji_patch.py branch 0x00485258 0x01cf0000 --link
+
+# Inject payload and trampoline into unpacked binary
+python3 tools/fuji_patch.py inject xt10_v131.bin payloads/payload.bin 0x00485258 0x01cf0000 xt10_v131_mod.bin
+```
+
+### Bare-Metal Payload Toolchain (`payloads/`)
+```bash
+# Check compiler status and build bare-metal ARM payloads
+make -C payloads check
+make -C payloads payload.bin   # Build for X-T10 (ARMv7-A)
+make -C payloads x10           # Build for X10 (ARMv5TE)
+```
+
 ---
 
 ## 5. Reverse Engineering Roadmap
 
 - [x] Initial header parsing and payload bit-flip decrypter.
 - [x] Checksum recalculator for repacking modified payloads.
-- [ ] Locate Film Simulation LUT color matrix buffers (Provia, Velvia, Astia, Classic Chrome).
+- [x] Mapped Film Simulation DSP tokens (`PROV`, `VEL`, `CHROME`, `_ASTIA`).
+- [x] Mapped 507-entry UI State Machine Menu Table (`FSIMMENU`, `AFMENU`, `CUSTOMMENU`).
+- [x] Automated Ghidra headless analyzer wrapper and labeling script.
+- [x] ARM32 bare-metal payload harness, linker script, and relative branch injector.
+- [ ] Deep decompilation of DSP color matrix load routines via Ghidra headless.
 - [ ] Map lens focus stepping functions for manual focus Snap Focus.
 - [ ] Implement USB PTP RAM dumper payload for live telemetry without flashing flash memory.
