@@ -4,9 +4,13 @@ Research repository, tooling, and memory mapping for reverse-engineering and mod
 - **Fujifilm X-T10** (EXR Processor II / X-Trans CMOS II)
 - **Fujifilm FinePix X10** (1st Gen EXR Processor / 2/3" EXR-CMOS)
 
-> **Disclaimer & Legal Notice:**
+> **Disclaimer & Legal Framework (Spain / EU):**
 > This repository contains **NO proprietary Fujifilm firmware files or copyright-protected binary dumps**. 
-> All research is conducted under legal interoperability provisions (EU Directive 2009/24/EC Articles 5/6, US DMCA §1201 exemptions). Tools operate strictly in clean-room local mode: users obtain official firmware updates directly from Fujifilm's distribution servers, and patches are computed on-the-fly.
+> All research is conducted strictly under **Articles 100.3, 100.4, and 100.5 of the Spanish Intellectual Property Law (LPI)** and **EU Directive 2009/24/EC Articles 5/6** (Interoperability and Study of Computer Programs, affirmed by CJEU Case C-406/10).
+> Tools operate exclusively in clean-room local mode: users obtain official firmware updates directly from Fujifilm's distribution servers, and patches are computed on-the-fly.
+> 
+> - Detailed legal analysis: [docs/LEGAL_AND_COMPLIANCE.md](docs/LEGAL_AND_COMPLIANCE.md)
+> - AI Agent guidelines & pre-commit validation checklist: [AGENTS.md](AGENTS.md)
 
 ---
 
