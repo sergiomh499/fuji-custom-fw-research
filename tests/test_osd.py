@@ -57,6 +57,15 @@ class TestOSD(unittest.TestCase):
         self.assertGreater(fb.get_pixel(2 * WIDTH // 3, HEIGHT // 2), 0)
         self.assertGreater(fb.get_pixel(WIDTH // 2, HEIGHT // 3), 0)
 
+        # Test XPan 65:24
+        fb.clear(0)
+        fb.draw_framing_guides("65:24")
+        self.assertGreater(fb.get_pixel(WIDTH // 2, 0), 0)
+
+        # Test 1:1 Square
+        fb.clear(0)
+        fb.draw_framing_guides("1:1")
+        self.assertGreater(fb.get_pixel(0, HEIGHT // 2), 0)
     def test_zebra_calculation(self):
         self.assertTrue(zebra_stripe(10, 10, 250, threshold=235))
         self.assertFalse(zebra_stripe(10, 10, 100, threshold=235))

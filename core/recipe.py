@@ -533,6 +533,10 @@ class RecipeBank:
             self._slots[slot] = rec
             count += 1
         return count
+    def load_builtin_recipes(self) -> None:
+        """Load slots C1 through C7 with curated modern film recipes."""
+        for slot, recipe in BUILTIN_RECIPES.items():
+            self.set_slot(slot, recipe)
 
     # aliases
     save_slot = set_slot
@@ -553,3 +557,42 @@ class RecipeBank:
 
     def __setitem__(self, slot, recipe):
         self.set_slot(slot, recipe)
+
+
+BUILTIN_RECIPES: Dict[str, Recipe] = {
+    "C1": Recipe(
+        name="Kodachrome 64", slot="C1", film_simulation="Classic Chrome",
+        dynamic_range=400, wb_mode="auto", wb_shift_r=2, wb_shift_b=-4,
+        highlight=-1, shadow=1, color=1, sharpness=1, noise_reduction=-2,
+    ),
+    "C2": Recipe(
+        name="Portra 400", slot="C2", film_simulation="Classic Chrome",
+        dynamic_range=400, wb_mode="auto", wb_shift_r=2, wb_shift_b=-5,
+        highlight=-1, shadow=-1, color=2, sharpness=-1, noise_reduction=-2,
+    ),
+    "C3": Recipe(
+        name="CineStill 800T", slot="C3", film_simulation="Pro Neg. Std",
+        dynamic_range=400, wb_mode="incandescent", wb_shift_r=3, wb_shift_b=-5,
+        highlight=0, shadow=1, color=2, sharpness=1, noise_reduction=-2,
+    ),
+    "C4": Recipe(
+        name="Tri-X 400", slot="C4", film_simulation="Monochrome",
+        dynamic_range=400, wb_mode="auto", wb_shift_r=0, wb_shift_b=0,
+        highlight=2, shadow=2, color=0, sharpness=1, noise_reduction=-2,
+    ),
+    "C5": Recipe(
+        name="Fuji Superia 400", slot="C5", film_simulation="Pro Neg. Hi",
+        dynamic_range=200, wb_mode="daylight", wb_shift_r=1, wb_shift_b=-3,
+        highlight=0, shadow=1, color=2, sharpness=1, noise_reduction=-2,
+    ),
+    "C6": Recipe(
+        name="Ilford HP5 Plus", slot="C6", film_simulation="Monochrome",
+        dynamic_range=400, wb_mode="auto", wb_shift_r=0, wb_shift_b=0,
+        highlight=1, shadow=2, color=0, sharpness=0, noise_reduction=-2,
+    ),
+    "C7": Recipe(
+        name="Velvia Landscape", slot="C7", film_simulation="Velvia",
+        dynamic_range=100, wb_mode="daylight", wb_shift_r=1, wb_shift_b=-1,
+        highlight=1, shadow=1, color=2, sharpness=2, noise_reduction=-2,
+    ),
+}

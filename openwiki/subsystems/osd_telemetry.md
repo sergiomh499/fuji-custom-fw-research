@@ -28,7 +28,7 @@ The Fujifilm X-T10 manages On-Screen Display (OSD) graphics separately from raw 
 - **Buffer Pointer:** Virtual RAM address `0x01B59BD4`.
 
 The `core/osd.py` module models this display plane, supporting:
-1. **Framing Guides:** Rule of thirds, 16:9 widescreen crops, and 2.39:1 anamorphic markers.
+1. **Framing Guides:** Rule of thirds, 16:9 widescreen crops, 2.39:1 anamorphic markers, **65:24 Hasselblad XPan panoramic letterbox**, and **1:1 square medium-format pillarbox**.
 2. **Zebra Stripes:** Overexposure warning masks computed on pixels exceeding a given luma threshold ($Y \ge 235$).
 3. **Peaking Masks:** High-contrast edge detection highlights for manual focusing.
 4. **Status Text:** Custom overlays displaying telemetry (battery millivolts, CPU temperature).

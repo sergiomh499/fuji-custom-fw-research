@@ -104,6 +104,21 @@ class TestRecipe(unittest.TestCase):
             self.assertGreaterEqual(n, 1)
             self.assertEqual(bank2.get_slot("C1").name, "Exported")
 
+    def test_builtin_recipes(self):
+        bank = RecipeBank()
+        bank.load_builtin_recipes()
+        self.assertEqual(bank["C1"].name, "Kodachrome 64")
+        self.assertEqual(bank["C2"].name, "Portra 400")
+        self.assertEqual(bank["C3"].name, "CineStill 800T")
+        self.assertEqual(bank["C4"].name, "Tri-X 400")
+        self.assertEqual(bank["C5"].name, "Fuji Superia 400")
+        self.assertEqual(bank["C6"].name, "Ilford HP5 Plus")
+        self.assertEqual(bank["C7"].name, "Velvia Landscape")
+        # Verify per-recipe decoupled white balance shifts
+        self.assertEqual(bank["C1"].wb_shift_r, 2)
+        self.assertEqual(bank["C1"].wb_shift_b, -4)
+        self.assertEqual(bank["C2"].wb_shift_b, -5)
+
     def test_aliases(self):
         r = Recipe()
         data = RecipeSerializer.serialize(r)

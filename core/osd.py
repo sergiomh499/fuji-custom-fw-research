@@ -34,7 +34,8 @@ DISPLAY_BUFFER_PTR = 0x01B59BD4
 GUIDE_THIRDS = "thirds"
 GUIDE_16_9 = "16:9"
 GUIDE_ANAMORPHIC = "2.39:1"
-
+GUIDE_XPAN = "65:24"
+GUIDE_SQUARE = "1:1"
 
 def rgb565(r: int, g: int, b: int) -> int:
     """Encode an 8-bit RGB triple as a 16-bit RGB565 value."""
@@ -142,7 +143,7 @@ class OSDFramebuffer:
     def draw_framing_guides(self, guide: str = GUIDE_THIRDS) -> None:
         """Draw framing guide overlays.
 
-        Supported guides: ``thirds``, ``16:9``, ``2.39:1`` (anamorphic).
+        Supported guides: ``thirds``, ``16:9``, ``2.39:1`` (anamorphic), ``65:24`` (XPan), ``1:1`` (square).
         """
         if guide == GUIDE_THIRDS or guide == "all":
             for frac in (1 / 3, 2 / 3):
@@ -163,7 +164,22 @@ class OSDFramebuffer:
                 self.draw_hline(y, 0, self.width - 1)
             for y in range(self.height - bar, self.height):
                 self.draw_hline(y, 0, self.width - 1)
-
+        if guide == GUIDE_XPAN or guide == "all":
+            # Hasselblad XPan panoramic aspect ratio 65:24
+            target_h = int(self.width * 24 / 65)
+            bar = (self.height - target_h) // 2
+            for y in range(0, bar):
+                self.draw_hline(y, 0, self.width - 1)
+            for y in range(self.height - bar, self.height):
+                self.draw_hline(y, 0, self.width - 1)
+        if guide == GUIDE_SQUARE or guide == "all":
+            # 1:1 Square crop (pillarbox on 4:3 LCD)
+            target_w = self.height
+            pillar = (self.width - target_w) // 2
+            for x in range(0, pillar):
+                self.draw_vline(x, 0, self.height - 1)
+            for x in range(self.width - pillar, self.width):
+                self.draw_vline(x, 0, self.height - 1)
     # aliases
     draw_grid = draw_framing_guides
     draw_guides = draw_framing_guides

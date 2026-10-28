@@ -77,12 +77,11 @@ class TestQ15(unittest.TestCase):
 
 class TestPresets(unittest.TestCase):
     def test_presets_exist(self):
-        for name in ("Classic Negative", "Eterna Bleach Bypass", "Nostalgic Neg"):
+        for name in ("Classic Negative", "Eterna Cinema", "Eterna Bleach Bypass", "Nostalgic Neg", "Acros", "Reala ACE"):
             self.assertIn(name, PRESETS)
             self.assertIn(name, PRESET_MATRICES)
             self.assertIn(name, BUILTIN_PRESETS)
-        self.assertEqual(len(list_presets()), 3)
-
+        self.assertEqual(len(list_presets()), 6)
     def test_preset_generation(self):
         for name in list_presets():
             p = get_preset(name)

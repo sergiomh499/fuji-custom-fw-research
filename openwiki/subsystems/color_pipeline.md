@@ -53,3 +53,13 @@ The `core/lut_compiler.py` and `tools/lut_compiler.py` modules allow compiling s
 2. **Coefficient Clamping:** Constrains values to valid fixed-point bounds to prevent integer overflow in DSP registers.
 3. **Tone Curve Fitting:** Derives highlight and shadow spline points from the neutral gray axis $(R=G=B)$.
 4. **Binary Patching:** `core/film_simulation.py` (`FilmSimulationPatcher`) writes the new matrix coefficients over unused or low-priority slots (such as Sepia or Monochrome filters) without modifying adjacent camera code.
+
+### Built-in Modern Presets
+
+The LUT compiler provides built-in pre-calibrated matrix and tone curve profiles for modern Fujifilm film simulations:
+- **Classic Negative:** High contrast, greenish-cyan shadows, warm highlights (Superia 400).
+- **Eterna Cinema:** Flat dynamic cinema profile with soft highlight rolloff and desaturated tones.
+- **Eterna Bleach Bypass:** Extreme tonal contrast with desaturated primary colors.
+- **Nostalgic Neg:** Amber warm highlights, rich cyan sky rendering (1970s American new color).
+- **Acros:** Enhanced monochrome luminance weights with extended shadow graduation.
+- **Reala ACE:** Natural true-to-life color rendering with neutral greens and deep reds.
