@@ -11,6 +11,7 @@ Research repository, tooling, and memory mapping for reverse-engineering and mod
 > 
 > - Detailed legal analysis: [docs/LEGAL_AND_COMPLIANCE.md](docs/LEGAL_AND_COMPLIANCE.md)
 > - AI Agent guidelines & pre-commit validation checklist: [AGENTS.md](AGENTS.md)
+> - Brick risk analysis, prevention & debricking guide: [docs/BRICK_ANALYSIS_AND_RECOVERY.md](docs/BRICK_ANALYSIS_AND_RECOVERY.md)
 
 ---
 
