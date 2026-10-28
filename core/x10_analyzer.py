@@ -39,6 +39,11 @@ _COLOR_MATRIX_MARKERS = (
     b"SENSOR_MATRIX",
     b"SENSOR COLOR",
     b"COLOR_MATRIX_2_3",
+    b"Velv",
+    b"AST",
+    b"MONOCHROM",
+    b"D-RANGE",
+    b"WHITE BALANC",
 )
 _LENS_MARKERS = (
     b"BARREL",
@@ -47,6 +52,11 @@ _LENS_MARKERS = (
     b"POWERON",
     b"POWER_ON",
     b"SWITCH",
+    b"KEY_POWER",
+    b"ZOOM_TELE",
+    b"DISPBAC",
+    b"S1",
+    b"S2",
 )
 _PRINTIM_NEEDLES = (b"PRINTIM", b"PrintIM", b"printim")
 
