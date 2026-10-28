@@ -1,0 +1,19 @@
+# Firmware blobs and proprietary dumps (DO NOT COMMIT)
+*.DAT
+*.dat
+*.bin
+*.BIN
+*.dump
+*.o
+*.elf
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
