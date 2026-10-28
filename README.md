@@ -9,10 +9,10 @@ Research repository, tooling, and memory mapping for reverse-engineering and mod
 > All research is conducted strictly under **Articles 100.3, 100.4, and 100.5 of the Spanish Intellectual Property Law (LPI)** and **EU Directive 2009/24/EC Articles 5/6** (Interoperability and Study of Computer Programs, affirmed by CJEU Case C-406/10).
 > Tools operate exclusively in clean-room local mode: users obtain official firmware updates directly from Fujifilm's distribution servers, and patches are computed on-the-fly.
 > 
-> - Detailed legal analysis: [docs/LEGAL_AND_COMPLIANCE.md](docs/LEGAL_AND_COMPLIANCE.md)
-> - AI Agent guidelines & pre-commit validation checklist: [AGENTS.md](AGENTS.md)
-> - Brick risk analysis, prevention & debricking guide: [docs/BRICK_ANALYSIS_AND_RECOVERY.md](docs/BRICK_ANALYSIS_AND_RECOVERY.md)
-
+- Detailed legal analysis: [docs/LEGAL_AND_COMPLIANCE.md](docs/LEGAL_AND_COMPLIANCE.md)
+- AI Agent guidelines & pre-commit validation checklist: [AGENTS.md](AGENTS.md)
+- Brick risk analysis, prevention & debricking guide: [docs/BRICK_ANALYSIS_AND_RECOVERY.md](docs/BRICK_ANALYSIS_AND_RECOVERY.md)
+- Technical roadmap & next steps: [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md)
 ---
 
 ## 1. Firmware Architecture Overview
