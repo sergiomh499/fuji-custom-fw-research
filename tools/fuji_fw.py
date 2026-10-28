@@ -23,6 +23,36 @@ OS_CODE_SIZES = {
     8: 512,
 }
 
+KNOWN_MODELS = {
+    "00051": {
+        "id": "xt10",
+        "name": "Fujifilm X-T10",
+        "processor": "EXR Processor II",
+        "sensor": "16.3MP X-Trans CMOS II (APS-C)",
+        "latest_fw": "1.31",
+        "fw_filename": "FWUP0007.DAT",
+        "dl_url": "https://dl.fujifilm-x.com/support/firmware/x-t10-131-p9j2em3l/FWUP0007.DAT",
+    },
+    "0001022": {
+        "id": "x10",
+        "name": "Fujifilm X10",
+        "processor": "EXR Processor (1st Gen)",
+        "sensor": "12.0MP 2/3-inch EXR CMOS",
+        "latest_fw": "2.01",
+        "fw_filename": "FPUPDATE.DAT",
+        "dl_url": "https://dl.fujifilm-x.com/support/firmware/x10ltJ8uL40/FPUPDATE.DAT",
+    },
+    "0001927": {
+        "id": "xf1",
+        "name": "Fujifilm XF1",
+        "processor": "EXR Processor (1st Gen)",
+        "sensor": "12.0MP 2/3-inch EXR CMOS",
+        "latest_fw": "1.01",
+        "fw_filename": "FPUPDATE.DAT",
+        "dl_url": "https://dl.fujifilm-x.com/support/firmware/xf1YbzzDmLK/FPUPDATE.DAT",
+    },
+}
+
 
 class FujiFirmware:
     def __init__(self, dat_bytes: bytes):
@@ -54,6 +84,13 @@ class FujiFirmware:
     def get_unpacked_payload(self) -> bytearray:
         """Bitwise NOT inversion of the payload (~byte) to get clear ARM binary."""
         return bytearray((~b) & 0xFF for b in self.payload_raw)
+    @property
+    def identified_model(self) -> dict | None:
+        for prefix, info in KNOWN_MODELS.items():
+            if self.model_code.startswith(prefix):
+                return info
+        return None
+
 
     def to_metadata(self) -> dict:
         return {
@@ -61,6 +98,8 @@ class FujiFirmware:
             "code_size": self.code_size,
             "header_size": self.header_size,
             "model_code": self.model_code,
+            "identified_model": self.identified_model["name"] if self.identified_model else "Unknown",
+            "processor": self.identified_model["processor"] if self.identified_model else "Unknown",
             "version1": self.v1,
             "version2": self.v2,
             "version": self.version_str,
@@ -81,6 +120,9 @@ def cmd_info(args):
     print(f" File:         {args.dat_file}")
     print(f" OS / Type:    {meta['os_type']}")
     print(f" Model Code:   {meta['model_code']}")
+    if fw.identified_model:
+        print(f" Identified:   {fw.identified_model['name']} ({fw.identified_model['processor']})")
+        print(f" Sensor:       {fw.identified_model['sensor']}")
     print(f" Version:      {meta['version']} (v1={hex(meta['version1'])}, v2={hex(meta['version2'])})")
     print(f" Checksum:     {meta['checksum']}")
     print(f" Header Size:  {meta['header_size']} bytes")
@@ -180,6 +222,38 @@ def cmd_scan(args):
         print(f"  0x{offset:08x}: {text}")
 
 
+def cmd_download(args):
+    import urllib.request
+    target = args.target.lower()
+    matched = None
+    for info in KNOWN_MODELS.values():
+        if info["id"] == target or info["name"].lower().replace("-", "") == target.replace("-", ""):
+            matched = info
+            break
+
+    if not matched:
+        print(f"[-] Unknown model target: {args.target}")
+        print("    Available targets: " + ", ".join(m["id"] for m in KNOWN_MODELS.values()))
+        sys.exit(1)
+
+    out_file = Path(args.output) if args.output else Path(matched["fw_filename"])
+    print(f"[*] Downloading official firmware for {matched['name']} (v{matched['latest_fw']})...")
+    print(f"    URL: {matched['dl_url']}")
+    print(f"    Target: {out_file}")
+
+    def _progress(block_num, block_size, total_size):
+        downloaded = block_num * block_size
+        if total_size > 0:
+            pct = min(100.0, downloaded * 100.0 / total_size)
+            mb = downloaded / (1024 * 1024)
+            tot_mb = total_size / (1024 * 1024)
+            sys.stdout.write(f"\r    [{pct:5.1f}%] {mb:5.1f} MB / {tot_mb:5.1f} MB")
+            sys.stdout.flush()
+
+    urllib.request.urlretrieve(matched["dl_url"], out_file, reporthook=_progress)
+    print(f"\n[+] Download complete: {out_file}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Fujifilm Camera Firmware Tool")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -206,6 +280,11 @@ def main():
     p_scan.add_argument("--filter", default="film,provia,velvia,focus,sqlite,af,menu", help="Comma-separated keyword filter")
     p_scan.add_argument("--limit", type=int, default=50, help="Max strings to display")
     p_scan.set_defaults(func=cmd_scan)
+
+    p_download = sub.add_parser("download", help="Download official firmware for supported camera (xt10, x10, xf1)")
+    p_download.add_argument("target", help="Camera model ID (xt10, x10, xf1)")
+    p_download.add_argument("-o", "--output", help="Optional output filename")
+    p_download.set_defaults(func=cmd_download)
 
     args = parser.parse_args()
     args.func(args)

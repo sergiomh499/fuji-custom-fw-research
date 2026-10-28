@@ -96,5 +96,39 @@ def test_roundtrip():
         assert bin2_path.read_bytes() == bytes(mod_data)
         print("[PASS] Round-trip payload matches modified input perfectly")
 
+
+def test_x10_model_identification():
+    os_type = 4
+    code_bytes = bytearray(512)
+    code_chars = "00010221"
+    for i, c in enumerate(code_chars):
+        code_bytes[1 + i*2] = ord(c)
+        code_bytes[i*2] = ord('3')
+
+    v1 = 2
+    v2 = 0x01
+    checksum = 0x38261731
+    end = 1
+    payload = bytes((~b) & 0xFF for b in b"X10_EXR_FIRMWARE_PAYLOAD")
+
+    header = struct.pack("<I", os_type) + bytes(code_bytes) + struct.pack("<IIII", v1, v2, checksum, end)
+    synthetic_dat = header + payload
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        dat_path = Path(tmpdir) / "FPUPDATE.DAT"
+        dat_path.write_bytes(synthetic_dat)
+
+        res = subprocess.run(
+            [sys.executable, "tools/fuji_fw.py", "info", str(dat_path)],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        assert "Fujifilm X10" in res.stdout, res.stdout
+        assert "EXR Processor (1st Gen)" in res.stdout, res.stdout
+        assert "Version:      2.01" in res.stdout, res.stdout
+        print("[PASS] Fujifilm X10 identified accurately from header")
+
 if __name__ == "__main__":
     test_roundtrip()
+    test_x10_model_identification()

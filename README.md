@@ -1,6 +1,8 @@
 # Fujifilm Custom Firmware Research (`fuji-custom-fw-research`)
 
-Research repository, tooling, and memory mapping for reverse-engineering and modifying Fujifilm camera firmware (focus on EXR Processor II / **Fujifilm X-T10**).
+Research repository, tooling, and memory mapping for reverse-engineering and modifying Fujifilm camera firmware:
+- **Fujifilm X-T10** (EXR Processor II / X-Trans CMOS II)
+- **Fujifilm FinePix X10** (1st Gen EXR Processor / 2/3" EXR-CMOS)
 
 > **Disclaimer & Legal Notice:**
 > This repository contains **NO proprietary Fujifilm firmware files or copyright-protected binary dumps**. 
@@ -49,12 +51,33 @@ Extracted from static analysis and FujiHack symbol stubs:
 | `OUT_OF_MEMORY_REAL` | `0x00bf4c84` | Physical text offset in dumped flash |
 | `OSD_DEBUG_SCREEN` | `0x007f9c1c` | On-Screen Display debug screen routine |
 
+
 ---
 
-## 3. Tooling (`tools/fuji_fw.py`)
+## 3. Model Specifics: Fujifilm FinePix X10
+
+- **Processor:** EXR Processor (1st Generation)
+- **Sensor:** 12.0 MP 2/3-inch EXR-CMOS (28-112mm f/2.0-2.8 manual zoom barrel)
+- **Architecture:** ARM 32-bit Little-Endian
+- **Latest Official Firmware:** `v2.01` (`FPUPDATE.DAT`, October 2015, ~25.8 MB)
+- **Model Code:** `00010221000102220001022300010224000102250001022600010227000102280001022900010235`
+- **Sister Target:** Identical platform to **Fujifilm XF1** where `CAN_CUSTOM_FIRMWARE`, `PRINTIM_HACK`, and `IMG_PROPS_HACK` were validated in FujiHack.
+- **Detailed Guide:** See [docs/X10_ARCHITECTURE.md](docs/X10_ARCHITECTURE.md).
+---
+
+## 4. Tooling (`tools/fuji_fw.py`)
 
 A zero-dependency Python 3 utility to inspect, decrypt, disassemble-prepare, and repack firmware:
 
+
+### Download Official Firmware Directly
+```bash
+# Download Fujifilm X-T10 official v1.31 (FWUP0007.DAT)
+python3 tools/fuji_fw.py download xt10
+
+# Download Fujifilm X10 official v2.01 (FPUPDATE.DAT)
+python3 tools/fuji_fw.py download x10
+```
 ### Inspect Firmware Header
 ```bash
 python3 tools/fuji_fw.py info FWUP0007.DAT
@@ -78,7 +101,7 @@ python3 tools/fuji_fw.py repack xt10_v131_mod.bin xt10_v131.json FWUP0007_PATCHE
 
 ---
 
-## 4. Reverse Engineering Roadmap
+## 5. Reverse Engineering Roadmap
 
 - [x] Initial header parsing and payload bit-flip decrypter.
 - [x] Checksum recalculator for repacking modified payloads.
