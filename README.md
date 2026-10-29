@@ -159,3 +159,5 @@ make -C payloads x10           # Build for X10 (ARMv5TE)
 - [x] Multi-scale Clarity filter with edge-preserving detail modulation (-5 to +5) (`core/clarity.py`).
 - [x] Color Chrome Effect & Color Chrome FX Blue non-linear saturation compression (`core/color_chrome.py`).
 - [x] Advanced Intervalometer with holy-grail exposure smoothing and bulb ramping (`core/intervalometer.py`).
+- [x] Fujifilm X-T20 v2.11 firmware decompilation: 16 ACROS profile descriptors & official KASAGO Wi-Fi patch diff (`core/xt20_extractor.py`, `docs/XT20_ANALYSIS.md`).
+- [x] Fujifilm X-T30 v2.01 firmware decompilation: 136 film simulation tokens, Classic Negative (`0x011F131D`), and 24 Color Chrome hardware descriptors (`core/xt30_extractor.py`, `docs/XT30_ANALYSIS.md`).

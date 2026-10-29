@@ -254,6 +254,62 @@ def cmd_analyze_x10(args):
     print("    Failure mitigation: " + "docs/BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery")
 
 
+def cmd_analyze_xt20(args):
+    bin_path = Path(args.bin_file)
+    if not bin_path.exists():
+        print(f"[-] Input file not found: {bin_path}")
+        return
+    raw = bin_path.read_bytes()
+    try:
+        from core.container import FujiContainer
+        fw = FujiContainer(raw)
+        data = bytes(fw.get_unpacked_payload())
+        print(f"[*] Detected .DAT container; unpacked {len(data):,} bytes")
+    except Exception:
+        data = raw
+    print("=" * 60)
+    print(" Fujifilm X-T20 Firmware Analysis (X-Trans III / v2.11)")
+    print(f" Loaded: {len(data):,} bytes")
+    print("=" * 60)
+    from core.xt20_extractor import XT20Extractor
+    extractor = XT20Extractor(data)
+    res = extractor.analyze()
+    acros_list = res.get("acros", [])
+    print(f"[+] ACROS Descriptors: {len(acros_list)}")
+    for desc in acros_list[:5]:
+        print(f"    - {desc.get('name')} @ 0x{desc.get('offset', 0):08x} (matrix @ 0x{desc.get('matrix_offset', 0):08x})")
+    wifi = res.get("wifi", {})
+    print(f"[+] Wi-Fi KASAGO Markers: {len(wifi.get('markers', {}))}")
+    print("[+] Analysis complete.")
+
+
+def cmd_analyze_xt30(args):
+    bin_path = Path(args.bin_file)
+    if not bin_path.exists():
+        print(f"[-] Input file not found: {bin_path}")
+        return
+    raw = bin_path.read_bytes()
+    try:
+        from core.container import FujiContainer
+        fw = FujiContainer(raw)
+        data = bytes(fw.get_unpacked_payload())
+        print(f"[*] Detected .DAT container; unpacked {len(data):,} bytes")
+    except Exception:
+        data = raw
+    print("=" * 60)
+    print(" Fujifilm X-T30 Firmware Analysis (X-Trans IV / v2.01)")
+    print(f" Loaded: {len(data):,} bytes")
+    print("=" * 60)
+    from core.xt30_extractor import XT30Extractor
+    extractor = XT30Extractor(data)
+    res = extractor.analyze()
+    print(f"[+] Film Tokens Found: {len(res.get('film_tokens', []))}")
+    print(f"[+] Classic Negative Hits: {len(res.get('classic_negative', []))}")
+    print(f"[+] Color Chrome Markers: {len(res.get('color_chrome', []))}")
+    print(f"[+] Extracted 3x3 Matrices: {len(res.get('matrices', []))}")
+    print("[+] Analysis complete.")
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="Fujifilm Camera Firmware Tool")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -326,6 +382,22 @@ def build_parser():
     )
     p_x10.add_argument("bin_file", nargs="?", default="x10_v201.bin", help="Path to unpacked .bin or .DAT")
     p_x10.set_defaults(func=cmd_analyze_x10)
+
+    p_xt20 = analyze_sub.add_parser(
+        "xt20",
+        help="Analyze Fujifilm X-T20 firmware (v2.11)",
+        epilog="Failure mitigation: docs/BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery",
+    )
+    p_xt20.add_argument("bin_file", nargs="?", default="xt20_v211.bin", help="Path to unpacked .bin or .DAT")
+    p_xt20.set_defaults(func=cmd_analyze_xt20)
+
+    p_xt30 = analyze_sub.add_parser(
+        "xt30",
+        help="Analyze Fujifilm X-T30 firmware (v2.01)",
+        epilog="Failure mitigation: docs/BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery",
+    )
+    p_xt30.add_argument("bin_file", nargs="?", default="xt30_v201.bin", help="Path to unpacked .bin or .DAT")
+    p_xt30.set_defaults(func=cmd_analyze_xt30)
 
     return parser
 

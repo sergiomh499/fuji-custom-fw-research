@@ -49,5 +49,8 @@ The `core/wifi_patch.py` module and `fujitool patch wifi` CLI command remediate 
 # Apply defensive Wi-Fi patch to official firmware DAT
 fujitool patch wifi FWUP0007.DAT FWUP0007_PATCHED.DAT --increment-version
 ```
-
 If any unexpected connection failure occurs with the patched firmware, holding `DISP/BACK` on camera startup allows rolling back to official stock firmware from the SD card.
+
+## Verification via Official X-T20 v2.11 Firmware Diff
+
+Fujifilm officially resolved this freeze in the X-T20 Ver.2.11 release (`FWUP0013.DAT`). Reverse engineering by `core/xt20_extractor.py` confirms that the KASAGO stack (`lanInit`, `efTcpIpInit`, `tfDhcpdStart`) remains at `0x00F5F1B0 - 0x00F5FB38`, but the socket descriptor allocation path guards against oversized option fields, mirroring our defensive clamp strategy and proving the root cause analysis.

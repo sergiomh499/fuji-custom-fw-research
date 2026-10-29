@@ -2,8 +2,10 @@
 
 from .xt10 import XT10_MODEL
 from .x10 import X10_MODEL
+from .xt20 import XT20_MODEL
+from .xt30 import XT30_MODEL
 
-ALL_MODELS = [XT10_MODEL, X10_MODEL]
+ALL_MODELS = [XT10_MODEL, X10_MODEL, XT20_MODEL, XT30_MODEL]
 
 
 def get_model_by_id(model_id: str):

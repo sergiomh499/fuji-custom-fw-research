@@ -119,3 +119,14 @@ class TestModular(unittest.TestCase):
         # just ensure command runs (missing file handled)
         res = subprocess.run([sys.executable, str(ROOT / "fujitool"), "analyze", "xt10", "nonexistent.bin"], capture_output=True, text=True, cwd=str(ROOT))
         assert res.returncode == 0
+
+    def test_xt20_and_xt30_models(self):
+        m20 = get_model_by_id("xt20")
+        assert m20 is not None
+        assert m20.name == "Fujifilm X-T20"
+        assert m20.processor == "X-Processor Pro"
+
+        m30 = get_model_by_id("xt30")
+        assert m30 is not None
+        assert m30.name == "Fujifilm X-T30"
+        assert m30.processor == "X-Processor 4"
