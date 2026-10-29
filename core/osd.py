@@ -71,6 +71,61 @@ def peaking_highlight(gradient: int, threshold: int = 40) -> bool:
     return int(gradient) >= int(threshold)
 
 
+def _false_color_rgb565(luma: int) -> int:
+    """Map a luminance value (0-255) to a false-color RGB565 value."""
+    l = max(0, min(255, int(luma)))
+    if l < 5:
+        return rgb565(128, 0, 128)   # clipped blacks (purple)
+    if l <= 25:
+        return rgb565(0, 0, 255)     # shadows (blue)
+    if 95 <= l <= 110:
+        return rgb565(0, 255, 0)     # 18% gray (green)
+    if 130 <= l <= 150:
+        return rgb565(255, 128, 192) # skin tones (pink)
+    if 165 <= l <= 191:
+        return rgb565(192, 192, 192) # highlights (light gray)
+    if l > 250:
+        return rgb565(255, 0, 0)     # clipped whites (red)
+    return rgb565(l, l, l)
+
+
+def draw_false_color(luma_buffer: "BytesLike", width: int = 640,
+                    height: int = 480) -> list:
+    """Map a luminance buffer into false-color RGB565 values.
+
+    Returns a list of ``width * height`` RGB565 ints.
+    """
+    n = width * height
+    out = [0] * n
+    for i in range(n):
+        lum = 0
+        if i < len(luma_buffer):
+            lum = luma_buffer[i]
+        out[i] = _false_color_rgb565(lum)
+    return out
+
+
+def _bresenham(fb: "OSDFramebuffer", x0: int, y0: int, x1: int, y1: int,
+               value: int) -> None:
+    x0, y0, x1, y1 = int(x0), int(y0), int(x1), int(y1)
+    dx = abs(x1 - x0)
+    dy = -abs(y1 - y0)
+    sx = 1 if x0 < x1 else -1
+    sy = 1 if y0 < y1 else -1
+    err = dx + dy
+    while True:
+        fb.set_pixel(x0, y0, value)
+        if x0 == x1 and y0 == y1:
+            break
+        e2 = 2 * err
+        if e2 >= dy:
+            err += dy
+            x0 += sx
+        if e2 <= dx:
+            err += dx
+            y0 += sy
+
+
 @dataclass
 class OSDFramebuffer:
     """Mutable view over a 640x480 OSD display buffer (307200 bytes).
@@ -221,6 +276,47 @@ class OSDFramebuffer:
                 self.buffer[i] = 0xFF
 
     draw_peaking_mask = draw_peaking
+
+    def draw_artificial_horizon(self, pitch_deg: float, roll_deg: float,
+                               tolerance: float = 0.5, color: int = 0xFF) -> None:
+        """Draw a 2-axis artificial horizon (roll + pitch) centered on the frame.
+
+        Level (|roll|, |pitch| <= tolerance) renders in green (0x07E0).
+        """
+        import math
+        level = abs(roll_deg) <= tolerance and abs(pitch_deg) <= tolerance
+        col = 0x07E0 if level else (color & 0xFF)
+        # color may be rgb565; store low byte for byte framebuffer
+        if isinstance(col, int) and col > 0xFF:
+            col = col & 0xFF
+        cx, cy0 = self.width // 2, self.height // 2
+        pitch_shift = int(pitch_deg * 4.0)
+        cy = cy0 + pitch_shift
+        half = max(self.width, self.height)
+        ang = math.radians(roll_deg)
+        dx = int(math.cos(ang) * half)
+        dy = int(math.sin(ang) * half)
+        _bresenham(self, cx - dx, cy - dy, cx + dx, cy + dy, col)
+        # pitch ladder: a few parallel lines
+        for off in (-60, -30, 30, 60):
+            px = int(-math.sin(ang) * off)
+            py = int(math.cos(ang) * off)
+            _bresenham(self, cx - dx + px, cy - dy + py,
+                       cx + dx + px, cy + dy + py, col)
+        # reference roll tick at centre
+        _bresenham(self, cx - 10, cy, cx + 10, cy, col)
+
+    def draw_false_color(self, luma_buffer, width: int | None = None,
+                         height: int | None = None):
+        if width is None:
+            width = self.width
+        if height is None:
+            height = self.height
+        out = draw_false_color(luma_buffer, width, height)
+        for i, v in enumerate(out):
+            if i < len(self.buffer):
+                self.buffer[i] = int(v) & 0xFF
+        return out
 
     def draw_status_bar(self, battery_voltage: float | None = None,
                         sensor_temp: float | None = None,

@@ -62,3 +62,9 @@ noise_reduction = -2
 ```
 
 The `RecipeBank` class provides bi-directional conversion: it validates parameter constraints, computes the CRC-32 checksum, and unpacks SD card text files directly into the camera's binary EEPROM memory layout.
+
+## Fujifilm X RAW STUDIO (.FP1) Interchange
+
+The `core/fp1.py` module introduces interoperability with Fujifilm's official PC tethering format (`.FP1` XML profile):
+- **Bi-directional Mapping:** Translates `.FP1` XML conversion tags (`<FilmSimulation>`, `<DynamicRange>`, `<WhiteBalance>`, `<WBShiftR>`, `<WBShiftB>`, `<HighlightTone>`, `<ShadowTone>`, `<GrainEffect>`) to and from `core.recipe.Recipe`.
+- **Cross-Generation Interchange:** Allows recipes developed in X RAW STUDIO by modern camera users (X-T4/X-T5) to be translated down to X-Trans II binary EEPROM format and exported to `/DCIM/RECIPES/` on the SD card.

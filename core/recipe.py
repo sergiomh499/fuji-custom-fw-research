@@ -166,9 +166,13 @@ class Recipe:
             v = getattr(self, attr)
             if not (-9 <= v <= 9):
                 raise ValueError(f"{attr} out of range: {v}")
-        for attr in ("highlight", "shadow", "color", "sharpness", "noise_reduction"):
+        for attr in ("highlight", "shadow"):
             v = getattr(self, attr)
-            if not (-2 <= v <= 2):
+            if not (-2 <= v <= 4):
+                raise ValueError(f"{attr} out of range: {v}")
+        for attr in ("color", "sharpness", "noise_reduction"):
+            v = getattr(self, attr)
+            if not (-4 <= v <= 4):
                 raise ValueError(f"{attr} out of range: {v}")
         if len(self.name.encode("utf-8")) > 32:
             # truncate to fit
@@ -290,9 +294,11 @@ class RecipeSerializer:
         for v, attr in ((wb_shift_r, "wb_shift_r"), (wb_shift_b, "wb_shift_b")):
             if not (-9 <= v <= 9):
                 raise ValueError(f"{attr} out of range: {v}")
-        for v, attr in ((highlight, "highlight"), (shadow, "shadow"), (color, "color"),
-                        (sharpness, "sharpness"), (nr, "noise_reduction")):
-            if not (-2 <= v <= 2):
+        for v, attr in ((highlight, "highlight"), (shadow, "shadow")):
+            if not (-2 <= v <= 4):
+                raise ValueError(f"{attr} out of range: {v}")
+        for v, attr in ((color, "color"), (sharpness, "sharpness"), (nr, "noise_reduction")):
+            if not (-4 <= v <= 4):
                 raise ValueError(f"{attr} out of range: {v}")
         return Recipe(
             name=name,

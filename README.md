@@ -151,3 +151,7 @@ make -C payloads x10           # Build for X10 (ARMv5TE)
 - [x] FinePix X10 EXR 1st Gen architecture analyzer and signature scanner (`core/x10_analyzer.py`, `fujitool analyze x10`).
 - [x] 3D-LUT to Fuji DSP matrix & 1D tone curve compiler (`core/lut_compiler.py`, `tools/lut_compiler.py`).
 - [x] Physical UART telemetry pinout and in-circuit SPI flashrom debricking runbook (`docs/HARDWARE_TELEMETRY_AND_RECOVERY.md`).
+- [x] Auto ISO 1/2/3 dynamic focal-length-aware minimum shutter speed calculator (`core/auto_iso.py`).
+- [x] Procedural film grain engine (Grain Effect Weak/Strong/Small/Large) with midtone parabolic luma weighting (`core/grain.py`).
+- [x] Fujifilm X RAW STUDIO (`.FP1`) XML profile bidirectional converter for recipe interchange (`core/fp1.py`).
+- [x] 2-Axis Electronic Horizon (pitch/roll level detection) & False Color IRE exposure scale (`core/osd.py`).

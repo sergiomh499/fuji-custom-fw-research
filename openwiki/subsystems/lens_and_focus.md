@@ -58,3 +58,12 @@ The `payloads/snap_focus/` payload implements an instant zone-focusing routine:
   - **5.0 m:** ~310 steps.
   - **Infinity ($\infty$):** 0 steps.
 - Compiles into an independent, position-independent ARMv7-A payload (`snap_focus.bin`).
+
+## Dynamic Auto ISO (Focal-Length-Aware Shutter Speed)
+
+Modern Fujifilm bodies use current focal length reported by the lens MCU (`CMD_LENS_INFO` `0x40`) to dynamically calculate minimum shutter speed:
+$$T_{\text{min}} = \frac{1}{\text{Crop Factor} \times f \times 2^{\text{Shift}}}$$
+
+The `core/auto_iso.py` module models this modern 3-slot Auto ISO engine (AUTO 1, AUTO 2, AUTO 3):
+- **Shift Modes:** Slower (-2 EV), Slow (-1 EV), Standard (0 EV), Fast (+1 EV), Faster (+2 EV).
+- **Quantization:** Rounds to exact photographic shutter speed stops (e.g. 1/60s, 1/125s, 1/250s) matching physical camera exposure steps.

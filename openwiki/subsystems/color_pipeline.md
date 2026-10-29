@@ -63,3 +63,12 @@ The LUT compiler provides built-in pre-calibrated matrix and tone curve profiles
 - **Nostalgic Neg:** Amber warm highlights, rich cyan sky rendering (1970s American new color).
 - **Acros:** Enhanced monochrome luminance weights with extended shadow graduation.
 - **Reala ACE:** Natural true-to-life color rendering with neutral greens and deep reds.
+
+## Procedural Grain Effect Engine
+
+Modern Fujifilm bodies (X-Trans III and newer) feature hardware-assisted procedural film grain. In `core/grain.py`:
+- **Roughness Modes:** `OFF`, `WEAK`, `STRONG`.
+- **Grain Sizes:** `SMALL`, `LARGE`.
+- **Density Curve Response:** Real silver-halide film grain concentrates in the midtones (Zone V) and rolls off in deep shadows and bright specular highlights. The engine weights noise injection using parabolic luminance modulation:
+  $$W(L) = 4 \cdot L \cdot (1 - L), \quad L \in [0, 1]$$
+- **Determinism:** Seeded PRNG ensures identical texture across identical image frames while avoiding visible repeating grid artifacts.

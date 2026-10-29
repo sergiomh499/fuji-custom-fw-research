@@ -32,7 +32,8 @@ The `core/osd.py` module models this display plane, supporting:
 2. **Zebra Stripes:** Overexposure warning masks computed on pixels exceeding a given luma threshold ($Y \ge 235$).
 3. **Peaking Masks:** High-contrast edge detection highlights for manual focusing.
 4. **Status Text:** Custom overlays displaying telemetry (battery millivolts, CPU temperature).
-
+5. **2-Axis Electronic Horizon:** Real-time roll ($\theta$) and pitch ladder projection; line transitions to level green (`0x07E0`) when $|\theta| \le 0.5^\circ$.
+6. **False Color IRE Scale:** Video exposure visualization mapping luminance to standardized IRE color bands (purple clipped blacks, blue shadows, green 18% gray, pink skin tones, red clipped highlights).
 The corresponding standalone ARMv7-A payload in `payloads/osd_overlay/` writes test patterns directly to the buffer descriptor with zero overhead.
 
 ## PTP/USB Live Volatile RAM Telemetry

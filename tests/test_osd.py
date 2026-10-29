@@ -20,6 +20,7 @@ from core.osd import (
     OSD_DEBUG_ROUTINE,
     DISPLAY_BUFFER_PTR,
     rgb565,
+    draw_false_color,
     zebra_stripe,
     peaking_highlight,
 )
@@ -119,6 +120,37 @@ class TestOSD(unittest.TestCase):
         self.assertTrue(BIN.is_file())
         self.assertLessEqual(BIN.stat().st_size, 8192)
 
+
+
+    def test_artificial_horizon_level(self):
+        fb = OSDFramebuffer()
+        fb.clear(0)
+        fb.draw_artificial_horizon(0, 0)
+        self.assertTrue(any(b != 0 for b in fb.buffer))
+
+    def test_artificial_horizon_tilted(self):
+        fb = OSDFramebuffer()
+        fb.clear(0)
+        fb.draw_artificial_horizon(0, 15)
+        self.assertTrue(any(b != 0 for b in fb.buffer))
+
+    def test_artificial_horizon_pitched(self):
+        fb = OSDFramebuffer()
+        fb.clear(0)
+        fb.draw_artificial_horizon(10, 0)
+        self.assertTrue(any(b != 0 for b in fb.buffer))
+
+    def test_false_color_bands(self):
+        from core.osd import rgb565
+        buf = bytes([0, 10, 100, 140, 175, 255])
+        out = draw_false_color(buf, width=6, height=1)
+        self.assertEqual(len(out), 6)
+        self.assertEqual(out[0], rgb565(128, 0, 128))   # clipped blacks
+        self.assertEqual(out[1], rgb565(0, 0, 255))     # shadows
+        self.assertEqual(out[2], rgb565(0, 255, 0))     # 18% gray
+        self.assertEqual(out[3], rgb565(255, 128, 192)) # skin
+        self.assertEqual(out[4], rgb565(192, 192, 192)) # highlights
+        self.assertEqual(out[5], rgb565(255, 0, 0))     # clipped whites
 
 if __name__ == "__main__":
     unittest.main()
