@@ -72,3 +72,17 @@ Modern Fujifilm bodies (X-Trans III and newer) feature hardware-assisted procedu
 - **Density Curve Response:** Real silver-halide film grain concentrates in the midtones (Zone V) and rolls off in deep shadows and bright specular highlights. The engine weights noise injection using parabolic luminance modulation:
   $$W(L) = 4 \cdot L \cdot (1 - L), \quad L \in [0, 1]$$
 - **Determinism:** Seeded PRNG ensures identical texture across identical image frames while avoiding visible repeating grid artifacts.
+
+## Color Chrome Effect & Color Chrome FX Blue
+
+In standard digital capture, highly saturated subjects (such as bright flowers, sunsets, or fabric) quickly saturate individual color channels, clipping texture.
+
+The `core/color_chrome.py` module models modern Fujifilm Color Chrome processing:
+- **Color Chrome Effect:** Evaluates pixel chroma $\text{Sat}(R, G, B)$ and applies non-linear luminance compression to dominant primary channels, preserving deep tonality and tonal graduation.
+- **Color Chrome FX Blue:** Selectively darkens azure and cyan sky hues ($H \approx 180^\circ - 250^\circ$) without shifting neutral white balance or affecting warm skin tones.
+
+## Clarity / Local Contrast Enhancement
+
+The `core/clarity.py` module models the modern -5 to +5 Clarity setting:
+- **Detail Band Isolation:** Decomposes luminance into low-frequency base and mid-frequency detail via edge-preserving filtering: $I_{\text{detail}} = I - I_{\text{base}}$.
+- **Modulation:** Positive clarity ($+1$ to $+5$) scales detail contrast by $1 + 0.2 \cdot k$ with soft-knee highlight/shadow protection, adding punch without halo artifacts. Negative clarity ($-1$ to $-5$) introduces subtle halation and skin-softening.

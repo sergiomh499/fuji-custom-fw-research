@@ -67,3 +67,15 @@ $$T_{\text{min}} = \frac{1}{\text{Crop Factor} \times f \times 2^{\text{Shift}}}
 The `core/auto_iso.py` module models this modern 3-slot Auto ISO engine (AUTO 1, AUTO 2, AUTO 3):
 - **Shift Modes:** Slower (-2 EV), Slow (-1 EV), Standard (0 EV), Fast (+1 EV), Faster (+2 EV).
 - **Quantization:** Rounds to exact photographic shutter speed stops (e.g. 1/60s, 1/125s, 1/250s) matching physical camera exposure steps.
+
+## Focus Bracketing (Focus BKT) Automation
+
+The `core/focus_bracket.py` module models the automated Focus Bracketing sequence:
+- **Optical DoF Calculation:** Derives hyperfocal distance $H = \frac{f^2}{N \cdot c} + f$ and depth of field based on aperture $N$ and circle of confusion ($c = 0.020$ mm on APS-C).
+- **Step Scaling:** Translates step sizes 1–10 into calibrated lens motor deltas (`CMD_LENS_MOVE_STEP` `0x12`), enforcing a 20–30% depth overlap between shots to ensure seamless focus stacking in post-production.
+
+## Advanced Intervalometer & Holy-Grail Exposure Smoothing
+
+The `core/intervalometer.py` module models timelapse automation:
+- **Frame Scheduling:** Configurable intervals, indefinite shot counts ($\infty$), and initial startup delays.
+- **Bulb Ramping & Exposure Smoothing:** Applies an exponential moving average (EMA) to frame median luminance, computing fractional micro-compensation ($\Delta \text{EV}$) to prevent exposure flicker during day-to-night transitions.

@@ -155,3 +155,7 @@ make -C payloads x10           # Build for X10 (ARMv5TE)
 - [x] Procedural film grain engine (Grain Effect Weak/Strong/Small/Large) with midtone parabolic luma weighting (`core/grain.py`).
 - [x] Fujifilm X RAW STUDIO (`.FP1`) XML profile bidirectional converter for recipe interchange (`core/fp1.py`).
 - [x] 2-Axis Electronic Horizon (pitch/roll level detection) & False Color IRE exposure scale (`core/osd.py`).
+- [x] Automated Focus Bracketing (Focus BKT) DoF step planner and X-mount motor step sequence generator (`core/focus_bracket.py`).
+- [x] Multi-scale Clarity filter with edge-preserving detail modulation (-5 to +5) (`core/clarity.py`).
+- [x] Color Chrome Effect & Color Chrome FX Blue non-linear saturation compression (`core/color_chrome.py`).
+- [x] Advanced Intervalometer with holy-grail exposure smoothing and bulb ramping (`core/intervalometer.py`).
