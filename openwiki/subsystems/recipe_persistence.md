@@ -68,3 +68,12 @@ The `RecipeBank` class provides bi-directional conversion: it validates paramete
 The `core/fp1.py` module introduces interoperability with Fujifilm's official PC tethering format (`.FP1` XML profile):
 - **Bi-directional Mapping:** Translates `.FP1` XML conversion tags (`<FilmSimulation>`, `<DynamicRange>`, `<WhiteBalance>`, `<WBShiftR>`, `<WBShiftB>`, `<HighlightTone>`, `<ShadowTone>`, `<GrainEffect>`) to and from `core.recipe.Recipe`.
 - **Cross-Generation Interchange:** Allows recipes developed in X RAW STUDIO by modern camera users (X-T4/X-T5) to be translated down to X-Trans II binary EEPROM format and exported to `/DCIM/RECIPES/` on the SD card.
+
+## EXIF MakerNotes Recipe Injection (`core/exif_recipe.py`)
+
+Modern photo editors (Lightroom Classic, Capture One) read proprietary camera recipe tags from the TIFF EXIF MakerNote (`0x927C`). The `core/exif_recipe.py` module and `fujitool tag` CLI command inject recipe metadata directly into JPEG and TIFF images:
+- **FilmMode / Simulation (`0x1001`):** Provia, Velvia, Astia, Classic Chrome, Classic Neg, Acros, etc.
+- **GrainEffect (`0x1047`):** Off (0), Weak (1), Strong (2).
+- **ColorChromeEffect (`0x1048`) & ChromeBlue (`0x1049`):** Off, Weak, Strong.
+- **Clarity (`0x104A`):** Signed 16-bit integer (-5 to +5).
+- **WB Fine Tune (`0x1040`):** Decoupled Red and Blue shift values.

@@ -310,6 +310,74 @@ def cmd_analyze_xt30(args):
     print("[+] Analysis complete.")
 
 
+def cmd_analyze_xt5(args):
+    bin_path = Path(args.bin_file)
+    if not bin_path.exists():
+        print(f"[-] Input file not found: {bin_path}")
+        return
+    raw = bin_path.read_bytes()
+    try:
+        from core.container import FujiContainer
+        fw = FujiContainer(raw)
+        data = bytes(fw.get_unpacked_payload())
+        print(f"[*] Detected .DAT container; unpacked {len(data):,} bytes")
+    except Exception:
+        data = raw
+    print("=" * 60)
+    print(" Fujifilm X-T5 Firmware Analysis (X-Trans V HR / v4.31)")
+    print(f" Loaded: {len(data):,} bytes")
+    print("=" * 60)
+    from core.xt5_extractor import XT5Extractor
+    extractor = XT5Extractor(data)
+    res = extractor.analyze()
+    print(f"[+] Film Tokens Found: {len(res.get('film_tokens', []))}")
+    print(f"[+] Nostalgic Neg Hits: {len(res.get('nostalgic_neg', []))}")
+    print(f"[+] Bleach Bypass Hits: {len(res.get('bleach_bypass', []))}")
+    print(f"[+] Reala ACE Hits: {len(res.get('reala_ace', []))}")
+    print(f"[+] Extracted 3x3 Matrices: {len(res.get('matrices', []))}")
+    print("[+] Analysis complete.")
+
+
+def cmd_tag(args):
+    from core.exif_recipe import FujiMakerNoteReader, FujiMakerNoteWriter
+    from core.recipe import BUILTIN_RECIPES, RecipeBank
+    img_path = Path(args.image)
+    if not img_path.exists():
+        print(f"[-] Image not found: {img_path}")
+        return
+    data = img_path.read_bytes()
+    if args.read:
+        reader = FujiMakerNoteReader(data)
+        rec = reader.extract_recipe()
+        print(f"[+] Extracted Recipe from {img_path.name}:")
+        print(f"    Name:            {rec.name}")
+        print(f"    Film Sim ID:     {rec.film_simulation}")
+        print(f"    Dynamic Range:   DR{rec.dynamic_range}")
+        print(f"    WB Shift:        R:{rec.wb_shift_r} B:{rec.wb_shift_b}")
+        print(f"    Highlight/Shadow:{rec.highlight} / {rec.shadow}")
+        print(f"    Color/Sharpness: {rec.color} / {rec.sharpness}")
+    else:
+        recipe_name = args.recipe or "C1"
+        rec = BUILTIN_RECIPES.get(recipe_name, BUILTIN_RECIPES["C1"])
+        writer = FujiMakerNoteWriter()
+        patched = writer.inject_recipe(data, rec)
+        out_path = Path(args.output) if args.output else img_path
+        out_path.write_bytes(patched)
+        print(f"[+] Injected recipe '{rec.name}' into {out_path} ({len(patched):,} bytes)")
+
+
+def cmd_render(args):
+    from core.pipeline_runner import PipelineRunner
+    from core.recipe import BUILTIN_RECIPES
+    in_path = Path(args.input)
+    out_path = Path(args.output)
+    if not in_path.exists():
+        print(f"[-] Input image not found: {in_path}")
+        return
+    runner = PipelineRunner()
+    rec = BUILTIN_RECIPES.get(args.recipe, BUILTIN_RECIPES["C1"]) if args.recipe else None
+    runner.render_file(in_path, out_path, recipe=rec)
+    print(f"[+] Rendered {in_path} -> {out_path} with modern Fuji image pipeline")
 def build_parser():
     parser = argparse.ArgumentParser(description="Fujifilm Camera Firmware Tool")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -398,6 +466,27 @@ def build_parser():
     )
     p_xt30.add_argument("bin_file", nargs="?", default="xt30_v201.bin", help="Path to unpacked .bin or .DAT")
     p_xt30.set_defaults(func=cmd_analyze_xt30)
+
+    p_xt5 = analyze_sub.add_parser(
+        "xt5",
+        help="Analyze Fujifilm X-T5 firmware (v4.31, X-Trans V)",
+        epilog="Failure mitigation: docs/BRICK_ANALYSIS_AND_RECOVERY.md#firmware-level-recovery",
+    )
+    p_xt5.add_argument("bin_file", nargs="?", default="xt5_v431.bin", help="Path to unpacked .bin or .DAT")
+    p_xt5.set_defaults(func=cmd_analyze_xt5)
+
+    p_tag = sub.add_parser("tag", help="Read or inject modern custom recipe EXIF MakerNotes")
+    p_tag.add_argument("image", help="Path to JPEG image")
+    p_tag.add_argument("--recipe", "-r", choices=["C1", "C2", "C3", "C4", "C5", "C6", "C7"], help="Recipe slot to inject")
+    p_tag.add_argument("--read", action="store_true", help="Read and print recipe metadata")
+    p_tag.add_argument("-o", "--output", help="Optional output image path")
+    p_tag.set_defaults(func=cmd_tag)
+
+    p_render = sub.add_parser("render", help="Render image through modern Fuji DSP pipeline (simulations, chrome, clarity, grain)")
+    p_render.add_argument("input", help="Input image (PPM/binary)")
+    p_render.add_argument("output", help="Output image (PPM/binary)")
+    p_render.add_argument("--recipe", "-r", choices=["C1", "C2", "C3", "C4", "C5", "C6", "C7"], help="Preset recipe to apply")
+    p_render.set_defaults(func=cmd_render)
 
     return parser
 

@@ -130,3 +130,8 @@ class TestModular(unittest.TestCase):
         assert m30 is not None
         assert m30.name == "Fujifilm X-T30"
         assert m30.processor == "X-Processor 4"
+
+        m5 = get_model_by_id("xt5")
+        assert m5 is not None
+        assert m5.name == "Fujifilm X-T5"
+        assert m5.processor == "X-Processor 5"

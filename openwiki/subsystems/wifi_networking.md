@@ -54,3 +54,11 @@ If any unexpected connection failure occurs with the patched firmware, holding `
 ## Verification via Official X-T20 v2.11 Firmware Diff
 
 Fujifilm officially resolved this freeze in the X-T20 Ver.2.11 release (`FWUP0013.DAT`). Reverse engineering by `core/xt20_extractor.py` confirms that the KASAGO stack (`lanInit`, `efTcpIpInit`, `tfDhcpdStart`) remains at `0x00F5F1B0 - 0x00F5FB38`, but the socket descriptor allocation path guards against oversized option fields, mirroring our defensive clamp strategy and proving the root cause analysis.
+
+## FUJIFILM XApp Protocol Reverse Engineering
+
+Introduced in X-T30 v2.00, X-T4 v2.00, and X-T5, the **FUJIFILM XApp** replaces the legacy Camera Remote app with a Bluetooth Low Energy (BLE) control plane paired with a Wi-Fi data handoff:
+- **Primary GATT Service:** `0x7770` (`00007770-0000-1000-8000-00805F9B34FB`).
+- **Characteristics:** Device Status (`0x7771`), Command/Pairing (`0x7772`), Geotagging (`0x7773`), Wi-Fi Handoff Credentials (`0x7774`), and Activity/Timeline Sync (`0x7775`).
+- **Packet Framing:** Standard 8-byte framing with `0xFACE` sync marker, message opcode, sequence number, payload length, and CRC16-CCITT checksum.
+- **Emulator Engine:** The `core/xapp_protocol.py` module models the pairing handshake, GPS geotag serialization, and shutter/simulation activity logging, documented in detail in `docs/XAPP_PROTOCOL.md`.

@@ -80,6 +80,22 @@ Run automated architectural checks and symbol identification on the unpacked bin
 ```bash
 ./fujitool analyze xt10 xt10_v131.bin
 ./fujitool analyze x10 x10_v201.bin
+./fujitool analyze xt20 xt20_v211.bin
+./fujitool analyze xt30 xt30_v201.bin
+./fujitool analyze xt5 xt5_v431.bin
+```
+
+### 7. Modern DSP Pipeline Rendering & EXIF Recipe Tagging
+Apply modern film simulations (Classic Neg, Acros, Reala ACE), Color Chrome, Clarity, and Grain Effect to image files, and tag EXIF MakerNotes:
+```bash
+# Render image using preset custom recipe C1 (Kodachrome 64)
+./fujitool render input.ppm output.ppm --recipe C1
+
+# Inject recipe metadata into EXIF MakerNotes for Lightroom / Capture One
+./fujitool tag photo.jpg --recipe C1
+
+# Read recipe metadata from a photo
+./fujitool tag photo.jpg --read
 ```
 
 ## Developer Navigation Map

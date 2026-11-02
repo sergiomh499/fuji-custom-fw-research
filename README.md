@@ -161,3 +161,7 @@ make -C payloads x10           # Build for X10 (ARMv5TE)
 - [x] Advanced Intervalometer with holy-grail exposure smoothing and bulb ramping (`core/intervalometer.py`).
 - [x] Fujifilm X-T20 v2.11 firmware decompilation: 16 ACROS profile descriptors & official KASAGO Wi-Fi patch diff (`core/xt20_extractor.py`, `docs/XT20_ANALYSIS.md`).
 - [x] Fujifilm X-T30 v2.01 firmware decompilation: 136 film simulation tokens, Classic Negative (`0x011F131D`), and 24 Color Chrome hardware descriptors (`core/xt30_extractor.py`, `docs/XT30_ANALYSIS.md`).
+- [x] Fujifilm X-T5 v4.31 firmware decompilation: X-Trans V HR architecture, Nostalgic Neg, Eterna Bleach Bypass, and Reala ACE DSP descriptors (`core/xt5_extractor.py`, `docs/XT5_ANALYSIS.md`).
+- [x] Unified Modern Image Pipeline Runner: offline DSP simulation with white balance, 3x3 color matrix, color chrome, clarity, curves, and grain (`core/pipeline_runner.py`, `tools/fuji_render.py`).
+- [x] EXIF MakerNote Recipe Injector & Reader: embed custom recipe simulation metadata into JPEG MakerNotes for Lightroom / Capture One (`core/exif_recipe.py`, `fujitool tag`).
+- [x] FUJIFILM XApp BLE GATT protocol emulator & timeline sync (`core/xapp_protocol.py`, `docs/XAPP_PROTOCOL.md`).

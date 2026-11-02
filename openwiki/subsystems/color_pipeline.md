@@ -64,11 +64,22 @@ The LUT compiler provides built-in pre-calibrated matrix and tone curve profiles
 - **Acros:** Enhanced monochrome luminance weights with extended shadow graduation.
 - **Reala ACE:** Natural true-to-life color rendering with neutral greens and deep reds.
 
-### Hardware Firmware Extraction (X-T20 & X-T30)
+### Hardware Firmware Extraction (X-T20, X-T30 & X-T5)
 
 Decompilation of official successors confirms:
 - **X-T20 (X-Trans III, v2.11):** 16 ACROS profile descriptors located across `0x003A395C - 0x003A8788` with dedicated Yellow, Red, and Green filter matrix channels.
 - **X-T30 (X-Trans IV, v2.01):** 136 film tokens, 4 Classic Negative hits (`0x011F131D`), and 24 Color Chrome hardware descriptors mapped across `0x0043xxxx - 0x0044xxxx`.
+- **X-T5 (X-Trans V HR, v4.31):** 180+ film tokens, Nostalgic Neg (`NEG_N`, `NOSTALGIC`), Eterna Bleach Bypass (`BLEACH_BYPASS`), and Reala ACE entries mapped in X-Processor 5 tables.
+
+## Unified Modern Pipeline Runner (`tools/fuji_render.py`)
+
+The `core/pipeline_runner.py` engine integrates all reverse-engineered DSP algorithms into an automated processing chain:
+1. **White Balance Shift:** Applies fine-tuned Red/Blue coordinate offsets.
+2. **3x3 Color Matrix:** Executes film simulation primaries conversion (Provia, Classic Neg, Acros, Reala ACE).
+3. **Color Chrome & FX Blue:** Tonal shoulder compression on high-saturation pixels.
+4. **Clarity:** Spatial mid-frequency unsharp modulation (-5 to +5).
+5. **Tone Curve:** Highlight and shadow spline adjustment.
+6. **Grain Effect:** Procedural luminance-weighted silver-halide noise addition.
 ## Procedural Grain Effect Engine
 
 Modern Fujifilm bodies (X-Trans III and newer) feature hardware-assisted procedural film grain. In `core/grain.py`:
