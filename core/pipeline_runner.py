@@ -264,6 +264,18 @@ class PipelineRunner:
     def from_raw(cls, data, width, height, **kwargs):
         return cls(data, width=width, height=height, **kwargs)
 
+    @classmethod
+    def render_file(cls, input_path: Union[str, Path], output_path: Union[str, Path], recipe: Optional[Recipe] = None, **kwargs) -> bytes:
+        w, h, data = cls.read_ppm(input_path)
+        if recipe is not None:
+            kwargs["recipe"] = recipe
+            if "simulation" not in kwargs:
+                kwargs["simulation"] = recipe.film_simulation
+        runner = cls(data, width=w, height=h, **kwargs)
+        out = runner.run()
+        cls.write_ppm(output_path, w, h, out)
+        return out
+
     # ---------- stages ----------
     def apply_white_balance(self, data: BytesLike) -> bytes:
         b = _as_bytes(data)

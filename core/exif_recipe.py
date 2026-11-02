@@ -418,10 +418,10 @@ def _build_tiff(recipe):
         (0x1006, 8, [int(r.sharpness)]),
         (0x100B, 8, [int(r.noise_reduction)]),
         (0x1040, 8, [int(r.wb_shift_r), int(r.wb_shift_b)]),
-        (0x1047, 3, [int(r.grain_effect)]),
-        (0x1048, 3, [int(r.color_chrome_effect)]),
-        (0x1049, 3, [int(r.color_chrome_fx_blue)]),
-        (0x104A, 8, [int(r.clarity)]),
+        (0x1047, 3, [int(getattr(r, "grain_effect", getattr(r, "grain", 0)) or 0)]),
+        (0x1048, 3, [int(getattr(r, "color_chrome_effect", getattr(r, "color_chrome", 0)) or 0)]),
+        (0x1049, 3, [int(getattr(r, "color_chrome_fx_blue", getattr(r, "color_chrome_blue", 0)) or 0)]),
+        (0x104A, 8, [int(getattr(r, "clarity", 0) or 0)]),
     ]
     mn_ifd_pos = 12
     mn_ifd_bytes = _encode_ifd(mn_entries, "<", mn_ifd_pos)
@@ -463,9 +463,10 @@ class FujiMakerNoteReader:
     from_bytes = staticmethod(lambda data: FujiMakerNoteReader(data).extract())
     read_recipe = read
 
-    @classmethod
-    def extract_recipe(cls, data):
-        return cls(data).read()
+    def extract_recipe(self, data=None):
+        if data is not None:
+            return self.read(data)
+        return self.read()
 
     @classmethod
     def extract_recipe_from_bytes(cls, data):
@@ -477,6 +478,10 @@ class FujiMakerNoteWriter:
         self.recipe = recipe
         self.data = data
 
+    def inject_recipe(self, data=None, recipe=None):
+        d = data if data is not None else self.data
+        r = recipe if recipe is not None else self.recipe
+        return self.write(d, r)
     @staticmethod
     def write(data, recipe):
         data = _as_bytes(data)
